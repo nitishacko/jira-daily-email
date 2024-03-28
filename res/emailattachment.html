@@ -14,7 +14,7 @@
         padding: 8px;
       }
       .tableHeaderTask {
-        background-color: #4caf50;
+        background-color: rgb(1, 13, 87);
         color: white;
       }
 
@@ -49,9 +49,9 @@
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ["Data", "Counts"],
-          ["Total Bugs", { TotalBugCount }],
-          ["Fixed Bugs", { FixedBugCount }],
-          ["Open Bugs", { OpenBugCount }],
+          ["Total Bugs", <%= TotalBugCount %>],
+          ["Fixed Bugs", <%= FixedBugCount %>],
+          ["Open Bugs", <%= OpenBugCount %>],
         ]);
 
         var options = {
@@ -74,7 +74,7 @@
     </script>
   </head>
   <body>
-    <h2>Daily Execution Report of {issue.summary}</h2>
+    <h2>Daily Execution Report of <%= TaskName %></h2>
     <div class="container">
       <table class="table">
         <thead>
@@ -86,7 +86,7 @@
           </tr>
         </thead>
         <tbody>
-          {Task.Summary}
+          <%= Task.Summary %>
         </tbody>
       </table>
     </div>
@@ -103,7 +103,7 @@
             </tr>
           </thead>
           <tbody>
-            {Bug.Summary}
+            <%= Bug.Summary %>
           </tbody>
         </table>
       </div>

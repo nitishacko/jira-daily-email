@@ -17,9 +17,12 @@
         background-color: #4caf50;
         color: white;
       }
-
       .tableHeaderBug {
         background-color: #801008;
+        color: white;
+      }
+      .tableHeaderMetric {
+        background-color: #010d57;
         color: white;
       }
       .container {
@@ -27,51 +30,7 @@
         margin: 10px; /* Adjust as needed */
         padding: 10px; /* Adjust as needed */
       }
-
-      .horizontalContainer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .horizontalContainer > div {
-        flex: 1;
-        text-align: center;
-      }
     </style>
-    <script
-      type="text/javascript"
-      src="https://www.gstatic.com/charts/loader.js"
-    ></script>
-    <script type="text/javascript">
-      google.charts.load("current", { packages: ["corechart", "bar"] });
-      google.charts.setOnLoadCallback(drawChart);
-
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ["Data", "Counts"],
-          ["Total Bugs", <%= TotalBugCount %>],
-          ["Fixed Bugs", <%= FixedBugCount %>],
-          ["Open Bugs", <%= OpenBugCount %>],
-        ]);
-
-        var options = {
-          title: "Bug Summary",
-          chartArea: { width: "50%" },
-          hAxis: {
-            title: "Counts",
-            minValue: 0,
-          },
-          vAxis: {
-            title: "Bugs",
-          },
-        };
-
-        var chart = new google.visualization.BarChart(
-          document.getElementById("chart_div")
-        );
-        chart.draw(data, options);
-      }
-    </script>
   </head>
   <body>
     <h2>Daily Execution Report of <%= TaskName %></h2>
@@ -90,7 +49,10 @@
         </tbody>
       </table>
     </div>
-    <div class="horizontalContainer">
+    <div class="container">
+      <div>
+        <h3>Bugs Summary</h3>
+      </div>
       <div>
         <table>
           <thead>
@@ -107,7 +69,27 @@
           </tbody>
         </table>
       </div>
-      <div id="chart_div"></div>
+      <div>
+        <h3>Bugs Metric</h3>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th class="tableHeaderMetric">#Total Bugs</th>
+              <th class="tableHeaderMetric">#Open Bugs</th>
+              <th class="tableHeaderMetric">#Closed Bugs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><%= TotalBugCount %></td>
+              <td><%= OpenBugCount %></td>
+              <td><%= FixedBugCount %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </body>
 </html>

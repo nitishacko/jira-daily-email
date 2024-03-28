@@ -1,0 +1,19 @@
+{
+  "jira": {
+    "baseUrl": "https://ackotech.atlassian.net/rest/api/3",
+    "username": "nitish.kumar@acko.tech",
+    "apiToken": "EN3YJjQ546b8750DrQbQ0C7D",
+    "jql": "project IN (TRAVEL, \"Embedded Partner automation\", GrowthEI, ACKO_PLATFORM) AND created >= startOfMonth(-2) AND type in (Story, Task, Subtask, Sub-task) AND labels = \"publish-daily-report\""
+  },
+  "email": {
+    "username": "test_automation@acko.tech",
+    "password": "Acko@123456"
+  },
+  "recipients": [
+    "nitish.kumar@acko.tech",
+    "venkatesh.g@acko.tech",
+    "naresh.rathor@acko.tech",
+    "pawan.chandra@acko.tech",
+    "yash.bhargava@acko.tech"
+  ]
+}

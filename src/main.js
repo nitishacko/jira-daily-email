@@ -4,27 +4,30 @@ const { assign } = require("nodemailer/lib/shared");
 const fs = require("fs");
 const _ = require("lodash");
 const { error } = require("console");
+const loadConfig = require("./propertyReader");
+
+const config = loadConfig();
 
 // Jira API base URL
-const jiraBaseUrl = "https://ackotech.atlassian.net/rest/api/3";
+const jiraBaseUrl = config.jira.baseUrl;
 
 // Jira API credentials
-const jiraUsername = "nitish.kumar@acko.tech";
-const jiraApiToken = "EN3YJjQ546b8750DrQbQ0C7D";
-const jql = `project IN (TRAVEL, "Embedded Partner automation", GrowthEI, ACKO_PLATFORM) AND created >= startOfMonth(-2) AND type in (Story, Task, Subtask, Sub-task) AND labels = "publish-daily-report"`;
+const jiraUsername = config.jira.username;
+const jiraApiToken = config.jira.apiToken;
+const jql = config.jira.jql;
 
 // Email credentials
-const emailUsername = "test_automation@acko.tech";
-const emailPassword = "Acko@123456";
+const emailUsername = config.email.username;
+const emailPassword = config.email.password;
 
 // Recipients
-const recipients = [
-  "nitish.kumar@acko.tech",
-  "venkatesh.g@acko.tech",
-  "naresh.rathor@acko.tech",
-  "pawan.chandra@acko.tech",
-  "yash.bhargava@acko.tech",
-];
+// // const recipients = [
+//   "nitish.kumar@acko.tech",
+//     "venkatesh.g@acko.tech",
+//     "naresh.rathor@acko.tech",
+//     "pawan.chandra@acko.tech",
+//     "yash.bhargava@acko.tech",
+// // ];
 const filterNullFields = (response) => {
   return response.data.issues.map((issue) => {
     let obj = issue.fields;
@@ -64,7 +67,7 @@ async function getBugsForIssue(issueKey) {
   return filterNullFields(response);
 }
 
-async function sendReport(report, subject = "Daily Jira Report") {
+async function sendReport(report, subject = "Daily Jira Report", htmlContent) {
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -72,12 +75,19 @@ async function sendReport(report, subject = "Daily Jira Report") {
       pass: emailPassword,
     },
   });
-
+  const htmlFilePath = subject.replace(/\s/g, "") + ".html";
+  fs.writeFileSync(htmlFilePath, htmlContent);
   let mailOptions = {
     from: emailUsername,
-    to: recipients.join(", "),
+    to: config.recipients.join(", "),
     subject: subject,
     html: report,
+    attachments: [
+      {
+        filename: "report.html",
+        path: htmlFilePath,
+      },
+    ],
   };
 
   await transporter.sendMail(mailOptions);
@@ -85,7 +95,9 @@ async function sendReport(report, subject = "Daily Jira Report") {
 
 async function main() {
   const htmlTemplate = fs.readFileSync("./res/emailTemplate.html", "utf8");
-  const compiled = _.template(htmlTemplate);
+  const htmlAttachment = fs.readFileSync("./res/emailattachment.html", "utf8");
+  const compiledTemplate = _.template(htmlTemplate);
+  const compiledAttachment = _.template(htmlAttachment);
   getIssuesWithLabel(jql).then((issues) => {
     let bugDetails = "";
     //parse the json array response and get the size
@@ -106,7 +118,9 @@ async function main() {
         const totalBugs = bugs.length;
         issue.totalBugs = totalBugs;
         const fixedBugs = bugs.filter(
-          (bug) => bug.fields.status.name === "Done"
+          (bug) =>
+            bug.fields.status.name === "Done" ||
+            bug.fields.status.name === "Closed"
         ).length;
         issue.fixedBugs = fixedBugs;
         const openBugs = totalBugs - fixedBugs;
@@ -139,11 +153,13 @@ async function main() {
             Summary: bugDetails,
           },
         };
-        const htmlReport = compiled(data);
+        const htmlReport = compiledTemplate(data);
+        const htmlAttachmentReport = compiledAttachment(data);
         // console.log(htmlReport);
         sendReport(
           htmlReport,
-          `[Embedded] QA Execution Report of ${issue.summary}`
+          `[Embedded] QA Execution Report of ${issue.summary}`,
+          htmlAttachmentReport
         )
           .then(() => console.log(htmlReport))
           .catch((error) => {
